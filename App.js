@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import SearchBar from './components/SearchBar';
-import FilmList from './components/FilmList';
+//import FilmList from './components/FilmList';
 import filmService from './services/filmService';
-
+import Header from './components/Header'; 
+import Footer from './components/Footer'; 
+import SearchBar from './components/SearchBar'; 
+import RecommendedMovies from './components/RecommendedMovies'; 
+import films from './films';
 function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [films, setFilms] = useState([]);
@@ -43,5 +46,5 @@ function App() {
     </div>
   );
 }
-
+//const App = () => { const [searchResults, setSearchResults] = useState([]); consthandleSearch = (query) => { // Logic to search films and set searchResults state // You can implement this based on your search requirements }; return ( <> <Header /> <divclassName="container"> <h1>React Film Search</h1> <SearchBar onSearch={handleSearch} />{searchResults.length > 0 ? ( <RecommendedMovies films={searchResults} /> ) : (<RecommendedMovies films={films} /> )} </div> <Footer /> </> ); } export default App;
 export default App;
