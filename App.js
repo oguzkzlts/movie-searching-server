@@ -34,8 +34,11 @@ function App() {
     setSearchTerm(term);
   };
 
-  return (
-    <div className="App">
+  const [searchResults, setSearchResults] = useState([]); 
+  consthandleSearch = (query) => { // Logic to search films and set searchResults state // You can implement this based on your search requirements }; 
+    return ( 
+     <div className="App">
+       <Header /> 
       <h1>Film Search</h1>
       <SearchBar onSearch={handleSearch} />
       {isLoading ? (
@@ -43,8 +46,13 @@ function App() {
       ) : (
         <FilmList films={films} />
       )}
-    </div>
-  );
-}
-//const App = () => { const [searchResults, setSearchResults] = useState([]); consthandleSearch = (query) => { // Logic to search films and set searchResults state // You can implement this based on your search requirements }; return ( <> <Header /> <divclassName="container"> <h1>React Film Search</h1> <SearchBar onSearch={handleSearch} />{searchResults.length > 0 ? ( <RecommendedMovies films={searchResults} /> ) : (<RecommendedMovies films={films} /> )} </div> <Footer /> </> ); } export default App;
+      <divclassName="container"> <h1>
+      React Film Search</h1> <SearchBar onSearch={handleSearch} />
+        {searchResults.length > 0 ? 
+      ( <RecommendedMovies films={searchResults} /> ) 
+        : (<RecommendedMovies films={films} /> )} 
+      <Footer /> 
+    </div>; )
+      };
+     
 export default App;
