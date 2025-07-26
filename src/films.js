@@ -241,3 +241,4 @@ const films = [
   }
 ];
 
+export default films;

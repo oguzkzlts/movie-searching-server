@@ -1,15 +1,18 @@
-// Simulates API call by filtering the static film list
 import allFilms from '../films';
 
 const searchFilms = async (query) => {
-    if (!query) return [];
-    const lowerQuery = query.toLowerCase();
-    return allFilms.filter(film =>
-        film.title.toLowerCase().includes(lowerQuery) ||
-        film.director.toLowerCase().includes(lowerQuery) ||
-        film.genre.some(g => g.toLowerCase().includes(lowerQuery))
+    if (!query) return allFilms;  // Return the full list if no query
+
+    const lower = query.toLowerCase();
+
+    // Filter films based on title, director, or genre
+    const filtered = allFilms.filter(film =>
+        film.title.toLowerCase().includes(lower) ||
+        film.director.toLowerCase().includes(lower) ||
+        film.genre.some(g => g.toLowerCase().includes(lower))
     );
+
+    return filtered;
 };
 
-const filmService = { searchFilms };
-export default filmService;
+export default { searchFilms };
