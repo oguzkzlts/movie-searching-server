@@ -1,244 +1,79 @@
+const API_KEY = '891b3c23e8efceb9531c877d720898e8'; // Replace this with your TMDb API key
+const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
+
 const films = [
-  {
-    id: 1,
-    title: "The Shawshank Redemption",
-    director: "Frank Darabont",
-    year: 1994,
-    genre: ["Drama"],
-    rating: 9.3,
-    synopsis: "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.",
-    image: "https://via.placeholder.com/150",
-  },
-  {
-    id: 2,
-    title: "The Godfather",
-    director: "Francis Ford Coppola",
-    year: 1972,
-    genre: ["Crime", "Drama"],
-    rating: 9.2,
-    synopsis: "The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant son.",
-    image: "https://via.placeholder.com/150",
-  },
-  {
-    id: 3,
-    title: "The Dark Knight",
-    director: "Christopher Nolan",
-    year: 2008,
-    genre: ["Action", "Crime", "Drama"],
-    rating: 9.0,
-    synopsis: "When the menace known as The Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.",
-    image: "https://via.placeholder.com/150",
-  },
-  {
-    id: 4,
-    title: "Schindler's List",
-    director: "Steven Spielberg",
-    year: 1993,
-    genre: ["Biography", "Drama", "History"],
-    rating: 8.9,
-    synopsis: "In German-occupied Poland during World War II, industrialist Oskar Schindler gradually becomes concerned for his Jewish workforce after witnessing their persecution by the Nazis.",
-    image: "https://via.placeholder.com/150",
-  },
-  {
-    id: 5,
-    title: "The Lord of the Rings: The Return of the King",
-    director: "Peter Jackson",
-    year: 2003,
-    genre: ["Action", "Adventure", "Drama"],
-    rating: 8.9,
-    synopsis: "Gandalf and Aragorn lead the World of Men against Sauron's army to draw his gaze from Frodo and Sam as they approach Mount Doom with the One Ring.",
-    image: "https://via.placeholder.com/150",
-  },
-  {
-    id: 6,
-    title: "Pulp Fiction",
-    director: "Quentin Tarantino",
-    year: 1994,
-    genre: ["Crime", "Drama"],
-    rating: 8.9,
-    synopsis: "The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption.",
-    image: "https://via.placeholder.com/150",
-  },
-  {
-    id: 7,
-    title: "Fight Club",
-    director: "David Fincher",
-    year: 1999,
-    genre: ["Drama"],
-    rating: 8.8,
-    synopsis: "An insomniac office worker and a devil-may-care soap maker form an underground fight club that evolves into much more.",
-    image: "https://via.placeholder.com/150",
-  },
-  {
-    id: 8,
-    title: "Forrest Gump",
-    director: "Robert Zemeckis",
-    year: 1994,
-    genre: ["Drama", "Romance"],
-    rating: 8.8,
-    synopsis: "The presidencies of Kennedy and Johnson, the Vietnam War, the Watergate scandal and other historical events unfold from the perspective of an Alabama man with an IQ of 75, whose only desire is to be reunited with his childhood sweetheart.",
-    image: "https://via.placeholder.com/150",
-  },
-  {
-    id: 9,
-    title: "Inception",
-    director: "Christopher Nolan",
-    year: 2010,
-    genre: ["Action", "Adventure", "Sci-Fi"],
-    rating: 8.8,
-    synopsis: "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.",
-    image: "https://via.placeholder.com/150",
-  },
-  {
-    id: 10,
-    title: "The Matrix",
-    director: "Lana Wachowski, Lilly Wachowski",
-    year: 1999,
-    genre: ["Action", "Sci-Fi"],
-    rating: 8.7,
-    synopsis: "A computer hacker learns from mysterious rebels about the true nature of his reality and his role in the war against its controllers.",
-    image: "https://via.placeholder.com/150",
-  },
-  {
-    id: 11,
-    title: "Goodfellas",
-    director: "Martin Scorsese",
-    year: 1990,
-    genre: ["Biography", "Crime", "Drama"],
-    rating: 8.7,
-    synopsis: "The story of Henry Hill and his life in the mob, covering his relationship with his wife Karen Hill and his mob partners Jimmy Conway and Tommy DeVito in the Italian-American crime syndicate.",
-    image: "https://via.placeholder.com/150",
-  },
-  {
-    id: 12,
-    title: "Se7en",
-    director: "David Fincher",
-    year: 1995,
-    genre: ["Crime", "Drama", "Mystery"],
-    rating: 8.6,
-    synopsis: "Two detectives, a rookie and a veteran, hunt a serial killer who uses the seven deadly sins as his motives.",
-    image: "https://via.placeholder.com/150",
-  },
-  {
-    id: 13,
-    title: "The Silence of the Lambs",
-    director: "Jonathan Demme",
-    year: 1991,
-    genre: ["Crime", "Drama", "Thriller"],
-    rating: 8.6,
-    synopsis: "A young F.B.I. cadet must receive the help of an incarcerated and manipulative cannibal killer to help catch another serial killer, a madman who skins his victims.",
-    image: "https://via.placeholder.com/150",
-  },
-  {
-    id: 14,
-    title: "Star Wars: Episode V - The Empire Strikes Back",
-    director: "Irvin Kershner",
-    year: 1980,
-    genre: ["Action", "Adventure", "Fantasy"],
-    rating: 8.7,
-    synopsis: "After the Rebels are brutally overpowered by the Empire on the ice planet Hoth, Luke Skywalker begins Jedi training with Yoda, while his friends are pursued across the galaxy by Darth Vader and bounty hunter Boba Fett.",
-    image: "https://via.placeholder.com/150",
-  },
-  {
-    id: 15,
-    title: "Inglourious Basterds",
-    director: "Quentin Tarantino",
-    year: 2009,
-    genre: ["Adventure", "Drama", "War"],
-    rating: 8.3,
-    synopsis: "In Nazi-occupied France during World War II, a plan to assassinate Nazi leaders by a group of Jewish U.S. soldiers coincides with a theatre owner's vengeful plans for the same.",
-    image: "https://via.placeholder.com/150",
-  },
-  {
-    id: 16,
-    title: "The Departed",
-    director: "Martin Scorsese",
-    year: 2006,
-    genre: ["Crime", "Drama", "Thriller"],
-    rating: 8.5,
-    synopsis: "An undercover cop and a mole in the police attempt to identify each other while infiltrating an Irish gang in South Boston.",
-    image: "https://via.placeholder.com/150",
-  },
-  {
-    id: 17,
-    title: "The Prestige",
-    director: "Christopher Nolan",
-    year: 2006,
-    genre: ["Drama", "Mystery", "Sci-Fi"],
-    rating: 8.5,
-    synopsis: "After a tragic accident, two stage magicians engage in a battle to create the ultimate illusion while sacrificing everything they have to outwit each other.",
-    image: "https://via.placeholder.com/150",
-  },
-  {
-    id: 18,
-    title: "The Green Mile",
-    director: "Frank Darabont",
-    year: 1999,
-    genre: ["Crime", "Drama", "Fantasy"],
-    rating: 8.6,
-    synopsis: "The lives of guards on Death Row are affected by one of their charges: a black man accused of child murder and rape, yet who has a mysterious gift.",
-    image: "https://via.placeholder.com/150",
-  },
-  {
-    id: 19,
-    title: "City of God",
-    director: "Fernando Meirelles, Kátia Lund",
-    year: 2002,
-    genre: ["Crime", "Drama"],
-    rating: 8.6,
-    synopsis: "In the slums of Rio, two kids' paths diverge as one struggles to become a photographer and the other a kingpin.",
-    image: "https://via.placeholder.com/150",
-  },
-  {
-    id: 20,
-    title: "The Usual Suspects",
-    director: "Bryan Singer",
-    year: 1995,
-    genre: ["Crime", "Mystery", "Thriller"],
-    rating: 8.5,
-    synopsis: "A sole survivor tells of the twisty events leading up to a horrific gun battle on a boat, which began when five criminals met at a seemingly random police lineup.",
-    image: "https://via.placeholder.com/150",
-  },
-  {
-    id: 21,
-    title: "Gladiator",
-    director: "Ridley Scott",
-    year: 2000,
-    genre: ["Action", "Adventure", "Drama"],
-    rating: 8.5,
-    synopsis: "A former Roman General sets out to exact vengeance against the corrupt emperor who murdered his family and sent him into slavery.",
-    image: "https://via.placeholder.com/150",
-  },
-  {
-    id: 22,
-    title: "Interstellar",
-    director: "Christopher Nolan",
-    year: 2014,
-    genre: ["Adventure", "Drama", "Sci-Fi"],
-    rating: 8.6,
-    synopsis: "A team of explorers travel through a wormhole in space in an attempt to ensure humanity's survival.",
-    image: "https://via.placeholder.com/150",
-  },
-  {
-    id: 23,
-    title: "Saving Private Ryan",
-    director: "Steven Spielberg",
-    year: 1998,
-    genre: ["Drama", "War"],
-    rating: 8.6,
-    synopsis: "Following the Normandy Landings, a group of U.S. soldiers go behind enemy lines to retrieve a paratrooper whose brothers have been killed in action.",
-    image: "https://via.placeholder.com/150",
-  },
-  {
-    id: 24,
-    title: "The Intouchables",
-    director: "Olivier Nakache, Éric Toledano",
-    year: 2011,
-    genre: ["Biography", "Comedy", "Drama"],
-    rating: 8.5,
-    synopsis: "After he becomes a quadriplegic from a paragliding accident, an aristocrat hires a young man from the projects to be his caregiver.",
-    image: "https://via.placeholder.com/150",
-  }
+  { id: 1, title: "The Shawshank Redemption", year: 1994 },
+  { id: 2, title: "The Godfather", year: 1972 },
+  { id: 3, title: "The Dark Knight", year: 2008 },
+  { id: 4, title: "Schindler's List", year: 1993 },
+  { id: 5, title: "The Lord of the Rings: The Return of the King", year: 2003 },
+  { id: 6, title: "Pulp Fiction", year: 1994 },
+  { id: 7, title: "Fight Club", year: 1999 },
+  { id: 8, title: "Forrest Gump", year: 1994 },
+  { id: 9, title: "Inception", year: 2010 },
+  { id: 10, title: "The Matrix", year: 1999 },
+  { id: 11, title: "Goodfellas", year: 1990 },
+  { id: 12, title: "Se7en", year: 1995 },
+  { id: 13, title: "The Silence of the Lambs", year: 1991 },
+  { id: 14, title: "Star Wars: Episode V - The Empire Strikes Back", year: 1980 },
+  { id: 15, title: "Inglourious Basterds", year: 2009 },
+  { id: 16, title: "The Departed", year: 2006 },
+  { id: 17, title: "The Prestige", year: 2006 },
+  { id: 18, title: "The Green Mile", year: 1999 },
+  { id: 19, title: "City of God", year: 2002 },
+  { id: 20, title: "The Usual Suspects", year: 1995 },
+  { id: 21, title: "Gladiator", year: 2000 },
+  { id: 22, title: "Interstellar", year: 2014 },
+  { id: 23, title: "Saving Private Ryan", year: 1998 },
+  { id: 24, title: "The Intouchables", year: 2011 }
 ];
+
+// Fetch the list of genres from TMDb once and map IDs to names
+async function getGenresMap() {
+  const res = await fetch(`https://api.themoviedb.org/3/genre/movie/list?api_key=${API_KEY}&language=en-US`);
+  const data = await res.json();
+  if (!data.genres) return {};
+  return data.genres.reduce((map, genre) => {
+    map[genre.id] = genre.name;
+    return map;
+  }, {});
+}
+
+// Get director name from movie credits
+async function getDirector(movieId) {
+  const res = await fetch(`https://api.themoviedb.org/3/movie/${movieId}/credits?api_key=${API_KEY}`);
+  const data = await res.json();
+  if (!data.crew) return null;
+  const director = data.crew.find(member => member.job === 'Director');
+  return director ? director.name : null;
+}
+
+// Main enrichment function to update films with TMDb data
+async function enrichWithTMDb() {
+  const genresMap = await getGenresMap();
+
+  for (let film of films) {
+    const searchUrl = `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(film.title)}&year=${film.year}`;
+    const res = await fetch(searchUrl);
+    const data = await res.json();
+
+    if (data.results && data.results.length > 0) {
+      const movie = data.results[0];
+
+      film.tmdb_id = movie.id;
+      film.image = movie.poster_path ? IMAGE_BASE_URL + movie.poster_path : null;
+      film.rating = movie.vote_average;
+      film.genre = movie.genre_ids.map(id => genresMap[id]).filter(Boolean);
+      film.synopsis = movie.overview;
+      film.director = await getDirector(movie.id);
+    } else {
+      console.warn(`No TMDb data found for "${film.title}"`);
+    }
+  }
+
+  console.log(JSON.stringify(films, null, 2));
+}
+
+enrichWithTMDb();
 
 export default films;

@@ -28,6 +28,8 @@ const SearchBar = ({ onSearch, suggestions }) => {
     const handleSelect = (title) => {
         setValue(title);
         onSearch(title);
+        const selectedFilm = suggestions.find(f => f.title === title);
+        if (selectedFilm && onSelect) onSelect(selectedFilm);
         setShowSuggestions(false);
     };
 
