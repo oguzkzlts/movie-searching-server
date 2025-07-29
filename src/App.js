@@ -3,15 +3,15 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import SearchBar from './components/SearchBar';
 import RecommendedMovies from './components/RecommendedMovies';
-import allFilms from './films';
 
 const API_KEY = '891b3c23e8efceb9531c877d720898e8';
 const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
 const BATCH_SIZE = 20;
 
 function App() {
+    const [allFilms, setAllFilms] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
-    const [films, setFilms] = useState(allFilms);
+    const [films, setFilms] = useState([]); //const [films, setFilms] = useState(allFilms);
     const [selectedFilm, setSelectedFilm] = useState(null);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -68,15 +68,24 @@ function App() {
         setLoading(false);
     };
 
+    // On mount, load popular movies if no search
+    useEffect(() => {
+        if (!searchTerm.trim()) {
+            fetchPopularMovies(1);
+        }
+    }, []);
+
     // Handle searchTerm changes
     useEffect(() => {
+        setSelectedFilm(null);
+        setPage(1);
+        accumulatedFilms.current = [];
+        setHasMore(true);
+
         if (searchTerm.trim()) {
-            setPage(1);
             fetchMovies(searchTerm, 1);
         } else {
-            setPage(1);
             fetchPopularMovies(1);
-            setSelectedFilm(null);
         }
     }, [searchTerm]);
 
@@ -134,7 +143,8 @@ function App() {
                 window.innerHeight + window.scrollY >=
                 document.documentElement.offsetHeight - 300
             ) {
-                if (searchTerm.trim() && page < totalPages) {
+                // Load more pages either for search or popular
+                if (page < totalPages) {
                     setPage((prevPage) => prevPage + 1);
                 }
             }
@@ -142,14 +152,19 @@ function App() {
 
         window.addEventListener('scroll', onScroll);
         return () => window.removeEventListener('scroll', onScroll);
-    }, [loading, hasMore, page, searchTerm, totalPages]);
+    }, [loading, hasMore, page, totalPages]);
 
     // Fetch next page when page state increments
     useEffect(() => {
-        if (page > 1 && searchTerm.trim()) {
-            fetchMovies(searchTerm, page);
+        if (page > 1) {
+            if (searchTerm.trim()) {
+                fetchMovies(searchTerm, page);
+            } else {
+                fetchPopularMovies(page);
+            }
         }
     }, [page]);
+
 
     // Handle selecting a movie to get detailed info including director
     const handleSelect = async (film) => {
@@ -187,6 +202,22 @@ function App() {
     const handleSearch = (query) => {
         setSearchTerm(query);
     };
+
+    useEffect(() => {
+        const fetchInitialSuggestions = async () => {
+            const res = await fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}&language=en-US&page=1`);
+            const data = await res.json();
+            if (data.results) {
+                const formatted = data.results.map(movie => ({
+                    id: movie.id,
+                    title: movie.title,
+                    year: movie.release_date?.split('-')[0] || 'N/A',
+                }));
+                setAllFilms(formatted);
+            }
+        };
+        fetchInitialSuggestions();
+    }, []);
 
     return (
         <div className="app container py-4">

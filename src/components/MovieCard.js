@@ -4,46 +4,46 @@ const MovieCard = ({ film }) => {
     const [expanded, setExpanded] = useState(false);
     const synopsisRef = useRef(null);
 
-    const handleMoreClick = () => {
-        setExpanded(true);
-        // Scroll into view smoothly and focus synopsis container
-        if (synopsisRef.current) {
+    const toggleExpanded = () => {
+        const newState = !expanded;
+        setExpanded(newState);
+
+        if (newState && synopsisRef.current) {
             synopsisRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            synopsisRef.current.focus();
         }
     };
 
-    const handleMouseLeave = () => {
-        setExpanded(false);
-    };
-
     return (
-        <div className="card h-100">
+        <div className="card h-100 shadow-sm border-0">
             <img src={film.image} className="card-img-top" alt={film.title} />
             <div className="card-body d-flex flex-column">
                 <h5 className="card-title">{film.title}</h5>
                 <p className="card-text text-muted mb-1">
-                    {film.director}, {film.year}
+                    {film.director ? `${film.director}, ` : ''}{film.year}
                 </p>
                 <p className="card-text mb-2">{film.genre.join(', ')}</p>
-                <p className="card-text fst-italic mb-2">Rating: {film.rating}</p>
-
+                <p className="card-text fst-italic mb-2">
+                    {film.rating && film.rating > 0
+                        ? `Rating: ${film.rating.toFixed(1)}`
+                        : 'No rating'}
+                </p>
                 <div
                     ref={synopsisRef}
-                    tabIndex={-1}
-                    onMouseLeave={expanded ? handleMouseLeave : undefined}
                     style={{
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         display: '-webkit-box',
-                        WebkitLineClamp: expanded ? 'none' : 3,
+                        WebkitLineClamp: expanded ? 'unset' : 3,
                         WebkitBoxOrient: 'vertical',
                         cursor: expanded ? 'default' : 'pointer',
-                        outline: expanded ? '2px solid #007bff' : 'none',
                         transition: 'all 0.3s ease',
                         flexGrow: 1,
+                        backgroundColor: expanded ? '#f5f5f5' : 'transparent',
+                        padding: expanded ? '0.5rem' : '0',
+                        borderRadius: '0.4rem',
+                        fontSize: '0.95rem',
+                        lineHeight: '1.5',
                     }}
-                    onClick={() => !expanded && handleMoreClick()}
                     aria-expanded={expanded}
                     role="region"
                     aria-label={`Synopsis for ${film.title}`}
@@ -51,16 +51,14 @@ const MovieCard = ({ film }) => {
                     {film.synopsis}
                 </div>
 
-                {!expanded && (
-                    <button
-                        onClick={handleMoreClick}
-                        className="btn btn-link p-0 mt-2"
-                        style={{ alignSelf: 'flex-start' }}
-                        aria-label={`Read more about ${film.title}`}
-                    >
-                        More
-                    </button>
-                )}
+                <button
+                    onClick={toggleExpanded}
+                    className="btn btn-sm btn-outline-secondary mt-2 align-self-start"
+                    style={{fontWeight: 500}}
+                    aria-label={expanded ? `Collapse synopsis for ${film.title}` : `Read more about ${film.title}`}
+                >
+                    {expanded ? 'Less' : 'More'}
+                </button>
             </div>
         </div>
     );
