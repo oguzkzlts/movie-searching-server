@@ -17,7 +17,7 @@ function App() {
     const [hasMore, setHasMore] = useState(true);
     const accumulatedFilms = useRef([]);
     const [initialLoadDone, setInitialLoadDone] = useState(false);
-    const [showFooter, setShowFooter] = useState(false);
+    const [isScrolling, setIsScrolling] = useState(false);
     const [selectedGenre, setSelectedGenre] = useState('');
     const [selectedYear, setSelectedYear] = useState('');
     const [selectedRating, setSelectedRating] = useState('');
@@ -25,6 +25,33 @@ function App() {
     const [genres, setGenres] = useState([]);
 
     const scrollTimeout = useRef(null);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            // User is scrolling
+            setIsScrolling(true);
+
+            // Clear existing timer
+            if (scrollTimeout.current) {
+                clearTimeout(scrollTimeout.current);
+            }
+
+            // Set timer to detect scroll stop (after 1s)
+            scrollTimeout.current = setTimeout(() => {
+                setIsScrolling(false);
+            }, 100); // 100 milliseconds after scroll ends
+        };
+
+        window.addEventListener('scroll', handleScroll);
+
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+            if (scrollTimeout.current) {
+                clearTimeout(scrollTimeout.current);
+            }
+        };
+    }, []);
+
 
     useEffect(() => {
         if (!initialLoadDone) return;
@@ -83,32 +110,6 @@ function App() {
         }
         setLoading(false);
     };
-
-    useEffect(() => {
-        const handleScroll = () => {
-            // Show footer immediately on scroll
-            setShowFooter(true);
-
-            // Clear existing timer
-            if (scrollTimeout.current) {
-                clearTimeout(scrollTimeout.current);
-            }
-
-            // Hide footer after 1 second of no scrolling
-            scrollTimeout.current = setTimeout(() => {
-                setShowFooter(false);
-            }, 15);
-        };
-
-        window.addEventListener('scroll', handleScroll);
-
-        return () => {
-            window.removeEventListener('scroll', handleScroll);
-            if (scrollTimeout.current) {
-                clearTimeout(scrollTimeout.current);
-            }
-        };
-    }, []);
 
         useEffect(() => {
         if (!searchTerm.trim()) {
@@ -196,6 +197,7 @@ function App() {
                 </div>
 
                 <Filters
+                    visible={!isScrolling}
                     genres={genres}
                     onGenreChange={(value) => { setSelectedGenre(value); setPage(1); }}
                     onYearChange={(value) => { setSelectedYear(value); setPage(1); }}
@@ -223,7 +225,7 @@ function App() {
                     )}
                 </div>
             </main>
-            <Footer visible={showFooter} />
+            <Footer visible={isScrolling} />
         </div>
     );
 }

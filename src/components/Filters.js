@@ -1,10 +1,10 @@
 import React from 'react';
 
-const Filters = ({ genres, onGenreChange, onYearChange, onRatingChange, onSortChange }) => {
+const Filters = ({ visible, genres, onGenreChange, onYearChange, onRatingChange, onSortChange }) => {
     const years = Array.from({ length: 25 }, (_, i) => 2025 - i); // 2000–2025
 
     return (
-        <div className="filters mb-4 d-flex flex-wrap gap-3">
+        <div className={`filters mb-4 d-flex flex-wrap gap-3 transition-opacity ${visible ? 'filters-visible' : 'filters-hidden'}`}>
             <select onChange={e => onGenreChange(e.target.value)} className="form-select w-auto">
                 <option value="">All Genres</option>
                 {genres.map(g => (

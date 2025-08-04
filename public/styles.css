@@ -22,20 +22,20 @@ html, body, #root {
     position: fixed;
     bottom: 0;
     width: 100%;
-    background-color: #0d6efd;
+    background-color: white;
     color: white;
-    border-top: 1px solid #0d6e;
-    padding: 1rem 0;
     text-align: center;
     z-index: 10;
-
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease, visibility 0.3s ease;
+    line-height: 1.2;       /* reduce line height */
 }
 
+
+
 .footer.show {
-    opacity: 1;
+    opacity: 0.75;
     visibility: visible;
 }
 
@@ -148,4 +148,19 @@ body {
     display: block;
     height: auto;
     cursor: default;
+}
+
+.filters-visible {
+    opacity: 0.6;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.filters-visible:hover {
+    opacity: 1;
+}
+
+.filters-hidden {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease-in-out;
 }
