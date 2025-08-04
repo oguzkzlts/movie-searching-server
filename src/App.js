@@ -4,6 +4,7 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import SearchBar from './components/SearchBar';
 import RecommendedMovies from './components/RecommendedMovies';
+import Filters from "./components/Filters";
 
 function App() {
     const [allFilms, setAllFilms] = useState([]);
@@ -17,30 +18,67 @@ function App() {
     const accumulatedFilms = useRef([]);
     const [initialLoadDone, setInitialLoadDone] = useState(false);
     const [showFooter, setShowFooter] = useState(false);
+    const [selectedGenre, setSelectedGenre] = useState('');
+    const [selectedYear, setSelectedYear] = useState('');
+    const [selectedRating, setSelectedRating] = useState('');
+    const [sortBy, setSortBy] = useState('popularity.desc');
+    const [genres, setGenres] = useState([]);
 
     const scrollTimeout = useRef(null);
+
+    useEffect(() => {
+        if (!initialLoadDone) return;
+
+        // Reset everything and fetch new movies based on updated filters
+        accumulatedFilms.current = [];
+        setFilms([]);
+        setPage(1);
+        setHasMore(true);
+        loadMovies(searchTerm.trim() ? searchTerm : null, 1);
+    }, [selectedGenre, selectedYear, selectedRating, sortBy]);
+
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, [selectedGenre, selectedYear, selectedRating, sortBy]);
+
+    useEffect(() => {
+        const fetchGenres = async () => {
+            try {
+                const res = await fetch(`https://api.themoviedb.org/3/genre/movie/list?api_key=${API_KEY}&language=en-US`);
+                const data = await res.json();
+                setGenres(data.genres || []);
+            } catch (error) {
+                console.error('Failed to fetch genres:', error);
+            }
+        };
+
+        fetchGenres();
+    }, []);
 
     const loadMovies = async (query, pageNum) => {
         setLoading(true);
         try {
-            const { films: newFilms, totalPages } = query
-                ? await filmService.fetchMovies(query, pageNum)
-                : await filmService.fetchPopularMovies(pageNum);
+            const filterParams = {
+                genre: selectedGenre,
+                year: selectedYear,
+                rating: selectedRating,
+                sortBy,
+            };
+
+            const { films: newFilms, totalPages } = await filmService.fetchMovies(query, pageNum, filterParams);
 
             if (pageNum === 1) {
                 accumulatedFilms.current = newFilms;
             } else {
                 accumulatedFilms.current = [...accumulatedFilms.current, ...newFilms];
             }
+
             setFilms(accumulatedFilms.current);
             setTotalPages(totalPages);
             setHasMore(pageNum < totalPages);
         } catch (error) {
             console.error('Fetch failed:', error);
-            if (pageNum === 1) {
-                accumulatedFilms.current = [];
-                setFilms([]);
-            }
+            setFilms([]);
             setHasMore(false);
         }
         setLoading(false);
@@ -156,6 +194,14 @@ function App() {
                         onSelect={handleSelect}
                     />
                 </div>
+
+                <Filters
+                    genres={genres}
+                    onGenreChange={(value) => { setSelectedGenre(value); setPage(1); }}
+                    onYearChange={(value) => { setSelectedYear(value); setPage(1); }}
+                    onRatingChange={(value) => { setSelectedRating(value); setPage(1); }}
+                    onSortChange={(value) => { setSortBy(value); setPage(1); }}
+                />
 
                 {selectedFilm && (
                     <div className="mb-5">

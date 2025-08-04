@@ -1,8 +1,26 @@
 const API_KEY = '891b3c23e8efceb9531c877d720898e8';
 const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
 
-async function fetchMovies(query, pageNum = 1) {
-    const url = `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}&page=${pageNum}`;
+async function fetchMovies(query, pageNum = 1, filters = {}) {
+    const baseURL = query
+        ? `https://api.themoviedb.org/3/search/movie`
+        : `https://api.themoviedb.org/3/discover/movie`;
+
+    const params = new URLSearchParams({
+        api_key: API_KEY,
+        page: pageNum,
+        sort_by: filters.sortBy || 'popularity.desc',
+        with_genres: filters.genre || '',
+        primary_release_year: filters.year || '',
+        'vote_average.gte': filters.rating || '',
+    });
+
+    // If using search, add query
+    if (query) {
+        params.append('query', query);
+    }
+
+    const url = `${baseURL}?${params.toString()}`;
     const res = await fetch(url);
     const data = await res.json();
 
