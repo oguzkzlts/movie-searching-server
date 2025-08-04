@@ -5,6 +5,40 @@ html, body, #root {
     margin: 0;
 }
 
+.app-wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    position: relative; /* needed for sticky positioning */
+}
+
+.app {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 120px; /* space for footer */
+}
+
+.footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background-color: #0d6efd;
+    color: white;
+    border-top: 1px solid #0d6e;
+    padding: 1rem 0;
+    text-align: center;
+    z-index: 10;
+
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.footer.show {
+    opacity: 1;
+    visibility: visible;
+}
+
 body {
     font-family: Arial, sans-serif;
     background-color: #f8f9fa; /* light Bootstrap gray */
@@ -115,11 +149,3 @@ body {
     height: auto;
     cursor: default;
 }
-
-
-.footer {
-    font-size: 0.875rem;
-}
-
-
-

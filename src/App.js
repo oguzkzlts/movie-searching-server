@@ -16,7 +16,9 @@ function App() {
     const [hasMore, setHasMore] = useState(true);
     const accumulatedFilms = useRef([]);
     const [initialLoadDone, setInitialLoadDone] = useState(false);
+    const [showFooter, setShowFooter] = useState(false);
 
+    const scrollTimeout = useRef(null);
 
     const loadMovies = async (query, pageNum) => {
         setLoading(true);
@@ -45,6 +47,32 @@ function App() {
     };
 
     useEffect(() => {
+        const handleScroll = () => {
+            // Show footer immediately on scroll
+            setShowFooter(true);
+
+            // Clear existing timer
+            if (scrollTimeout.current) {
+                clearTimeout(scrollTimeout.current);
+            }
+
+            // Hide footer after 1 second of no scrolling
+            scrollTimeout.current = setTimeout(() => {
+                setShowFooter(false);
+            }, 15);
+        };
+
+        window.addEventListener('scroll', handleScroll);
+
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+            if (scrollTimeout.current) {
+                clearTimeout(scrollTimeout.current);
+            }
+        };
+    }, []);
+
+        useEffect(() => {
         if (!searchTerm.trim()) {
             loadMovies(null, 1).then(() => setInitialLoadDone(true));
         }
@@ -117,12 +145,16 @@ function App() {
 
     return (
         <div className="app-wrapper d-flex flex-column min-vh-100">
-            <div className="app container py-4">
+            <main className="app container py-4 flex-grow-1">
                 <Header />
                 <h1 className="mb-4">Movie Search</h1>
 
                 <div className="search-container mb-5">
-                    <SearchBar onSearch={handleSearch} suggestions={allFilms} onSelect={handleSelect} />
+                    <SearchBar
+                        onSearch={handleSearch}
+                        suggestions={allFilms}
+                        onSelect={handleSelect}
+                    />
                 </div>
 
                 {selectedFilm && (
@@ -135,13 +167,17 @@ function App() {
                 <div className="movies-container">
                     <h4 className="mb-3">Recommended Movies</h4>
                     <RecommendedMovies films={films} />
-                    {loading && <p className="text-center mt-3">Loading more movies...</p>}
+
+                    {loading && (
+                        <p className="text-center mt-3 text-primary">Loading more movies...</p>
+                    )}
+
                     {!hasMore && films.length > 0 && (
                         <p className="text-center text-muted mt-3">No more movies to load.</p>
                     )}
                 </div>
-            </div>
-            <Footer />
+            </main>
+            <Footer visible={showFooter} />
         </div>
     );
 }
