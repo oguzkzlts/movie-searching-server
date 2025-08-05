@@ -17,41 +17,71 @@ function App() {
     const [hasMore, setHasMore] = useState(true);
     const accumulatedFilms = useRef([]);
     const [initialLoadDone, setInitialLoadDone] = useState(false);
-    const [isScrolling, setIsScrolling] = useState(false);
     const [selectedGenre, setSelectedGenre] = useState('');
     const [selectedYear, setSelectedYear] = useState('');
     const [selectedRating, setSelectedRating] = useState('');
     const [sortBy, setSortBy] = useState('popularity.desc');
     const [genres, setGenres] = useState([]);
+    const [scrollY, setScrollY] = useState(0);
+    const [lastScrollY, setLastScrollY] = useState(0);
+    const [scrollDirection, setScrollDirection] = useState(null);
+    const [isScrolling, setIsScrolling] = useState(false);
 
-    const scrollTimeout = useRef(null);
+    const [showStickyFilters, setShowStickyFilters] = useState(false);
+
+    const filtersRef = useRef(null);
 
     useEffect(() => {
         const handleScroll = () => {
-            // User is scrolling
-            setIsScrolling(true);
+            if (!initialLoadDone || loading || !hasMore) return;
 
-            // Clear existing timer
-            if (scrollTimeout.current) {
-                clearTimeout(scrollTimeout.current);
+            const scrollTop = window.scrollY;
+            const windowHeight = window.innerHeight;
+            const fullHeight = document.documentElement.scrollHeight;
+
+            if (scrollTop + windowHeight >= fullHeight - 100) {
+                setPage(prev => {
+                    if (prev < totalPages) return prev + 1;
+                    return prev;
+                });
             }
-
-            // Set timer to detect scroll stop (after 1s)
-            scrollTimeout.current = setTimeout(() => {
-                setIsScrolling(false);
-            }, 100); // 100 milliseconds after scroll ends
         };
 
         window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [initialLoadDone, loading, hasMore, totalPages]);
 
-        return () => {
-            window.removeEventListener('scroll', handleScroll);
-            if (scrollTimeout.current) {
-                clearTimeout(scrollTimeout.current);
+
+    useEffect(() => {
+        let lastY = window.scrollY;
+        let timeout;
+
+        const handleScroll = () => {
+            const currentY = window.scrollY;
+
+            // Detect scroll direction
+            if (currentY > lastY) {
+                setScrollDirection('down');
+            } else if (currentY < lastY) {
+                setScrollDirection('up');
             }
-        };
-    }, []);
+            lastY = currentY;
 
+            // Sticky trigger logic
+            if (filtersRef.current) {
+                const { bottom } = filtersRef.current.getBoundingClientRect();
+                setShowStickyFilters(bottom <= 0);
+            }
+
+            // Fade logic
+            setIsScrolling(true);
+            clearTimeout(timeout);
+            timeout = setTimeout(() => setIsScrolling(false), 150);
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     useEffect(() => {
         if (!initialLoadDone) return;
@@ -136,30 +166,6 @@ function App() {
         }
     }, [page]);
 
-
-    useEffect(() => {
-        const handleScroll = () => {
-            if (!initialLoadDone || loading || !hasMore) return;
-
-            const scrollTop = window.scrollY;
-            const windowHeight = window.innerHeight;
-            const fullHeight = document.documentElement.scrollHeight;
-
-            if (scrollTop + windowHeight >= fullHeight - 100) {
-                setPage(prev => {
-                    if (prev < totalPages) {
-                        return prev + 1;
-                    }
-                    return prev;
-                });
-            }
-        };
-
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, [initialLoadDone, loading, hasMore, totalPages]);
-
-
     const handleSelect = async (film) => {
         try {
             const enrichedFilm = await filmService.fetchMovieDetails(film.id);
@@ -188,6 +194,44 @@ function App() {
                 <Header />
                 <h1 className="mb-4">Movie Search</h1>
 
+                <Filters
+                    className="filters static"
+                    ref={filtersRef}
+                    static
+                    scrollDirection={scrollDirection}
+                    isScrolling={false}
+                    genres={genres}
+                    onGenreChange={(value) => setSelectedGenre(value)}
+                    onYearChange={(value) => setSelectedYear(value)}
+                    onRatingChange={(value) => setSelectedRating(value)}
+                    onSortChange={(value) => setSortBy(value)}
+                />
+
+
+
+                {/* Sticky Filters that fade/hide/hover based on scroll */}
+                {showStickyFilters && (
+                    <div
+                        className={`filters sticky-filters ${
+                            scrollDirection === 'down' && isScrolling
+                                ? 'filters-hidden'
+                                : !isScrolling
+                                    ? 'filters-transparent'
+                                    : 'filters-visible'
+                        }`}
+                    >
+                        <Filters
+                            scrollDirection={scrollDirection}
+                            isScrolling={isScrolling}
+                            genres={genres}
+                            onGenreChange={(value) => setSelectedGenre(value)}
+                            onYearChange={(value) => setSelectedYear(value)}
+                            onRatingChange={(value) => setSelectedRating(value)}
+                            onSortChange={(value) => setSortBy(value)}
+                        />
+                    </div>
+                )}
+
                 <div className="search-container mb-5">
                     <SearchBar
                         onSearch={handleSearch}
@@ -195,15 +239,6 @@ function App() {
                         onSelect={handleSelect}
                     />
                 </div>
-
-                <Filters
-                    visible={!isScrolling}
-                    genres={genres}
-                    onGenreChange={(value) => { setSelectedGenre(value); setPage(1); }}
-                    onYearChange={(value) => { setSelectedYear(value); setPage(1); }}
-                    onRatingChange={(value) => { setSelectedRating(value); setPage(1); }}
-                    onSortChange={(value) => { setSortBy(value); setPage(1); }}
-                />
 
                 {selectedFilm && (
                     <div className="mb-5">

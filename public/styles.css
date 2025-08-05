@@ -16,6 +16,7 @@ html, body, #root {
     flex: 1;
     overflow-y: auto;
     padding-bottom: 120px; /* space for footer */
+    position: relative;
 }
 
 .footer {
@@ -150,17 +151,49 @@ body {
     cursor: default;
 }
 
-.filters-visible {
-    opacity: 0.6;
-    transition: opacity 0.3s ease-in-out;
+/* Filters styling */
+.filters {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background: white;
+    border-bottom: 1px solid #ddd;
+    transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-.filters-visible:hover {
-    opacity: 1;
+/* Sticky Filters Container */
+/* App.css or your global styles */
+
+.sticky-filters {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    z-index: 1000;
+    padding: 1rem;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .filters-hidden {
     opacity: 0;
+    visibility: hidden;
     pointer-events: none;
-    transition: opacity 0.3s ease-in-out;
+}
+
+.filters-transparent {
+    opacity: 0.5;
+    pointer-events: auto;
+}
+
+.filters-visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.filters:hover {
+    opacity: 1 !important;
 }

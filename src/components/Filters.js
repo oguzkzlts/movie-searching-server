@@ -1,38 +1,43 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 
-const Filters = ({ visible, genres, onGenreChange, onYearChange, onRatingChange, onSortChange }) => {
-    const years = Array.from({ length: 25 }, (_, i) => 2025 - i); // 2000–2025
+const Filters = forwardRef(({
+                                static: isStatic = false,
+                                genres,
+                                onGenreChange,
+                                onYearChange,
+                                onRatingChange,
+                                onSortChange,
+                                className = ''
+                            }, ref) => {
+    const years = Array.from({ length: 25 }, (_, i) => 2025 - i);
 
     return (
-        <div className={`filters mb-4 d-flex flex-wrap gap-3 transition-opacity ${visible ? 'filters-visible' : 'filters-hidden'}`}>
-            <select onChange={e => onGenreChange(e.target.value)} className="form-select w-auto">
+        <div ref={ref} className={`filters ${className}`}>
+            <select onChange={(e) => onGenreChange(e.target.value)} className="form-select mb-2">
                 <option value="">All Genres</option>
-                {genres.map(g => (
+                {genres.map((g) => (
                     <option key={g.id} value={g.id}>{g.name}</option>
                 ))}
             </select>
-
-            <select onChange={e => onYearChange(e.target.value)} className="form-select w-auto">
+            <select onChange={(e) => onYearChange(e.target.value)} className="form-select mb-2">
                 <option value="">All Years</option>
-                {years.map(y => (
+                {years.map((y) => (
                     <option key={y} value={y}>{y}</option>
                 ))}
             </select>
-
-            <select onChange={e => onRatingChange(e.target.value)} className="form-select w-auto">
+            <select onChange={(e) => onRatingChange(e.target.value)} className="form-select mb-2">
                 <option value="">All Ratings</option>
-                {[9, 8, 7, 6, 5].map(r => (
-                    <option key={r} value={r}>{r}+</option>
+                {[...Array(10)].map((_, i) => (
+                    <option key={i + 1} value={i + 1}>{i + 1}+</option>
                 ))}
             </select>
-
-            <select onChange={e => onSortChange(e.target.value)} className="form-select w-auto">
-                <option value="popularity.desc">Most Popular</option>
-                <option value="release_date.desc">Newest</option>
-                <option value="vote_average.desc">Top Rated</option>
+            <select onChange={(e) => onSortChange(e.target.value)} className="form-select">
+                <option value="popularity.desc">Popularity</option>
+                <option value="vote_average.desc">Rating</option>
+                <option value="release_date.desc">Latest</option>
             </select>
         </div>
     );
-};
+});
 
 export default Filters;
