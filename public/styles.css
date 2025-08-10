@@ -152,48 +152,69 @@ body {
 }
 
 /* Filters styling */
-.filters {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-    padding: 0.5rem 1rem;
-    background: white;
-    border-bottom: 1px solid #ddd;
-    transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-/* Sticky Filters Container */
-/* App.css or your global styles */
-
+/* Sticky container stays fixed at the top */
 .sticky-filters {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    background: white;
     z-index: 1000;
-    padding: 1rem;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.85); /* translucent for modern look */
+    backdrop-filter: blur(8px); /* frosted glass effect */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
     transition: opacity 0.3s ease, visibility 0.3s ease;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
+/* Keep your hidden/visible states */
 .filters-hidden {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
 }
-
 .filters-transparent {
     opacity: 0.5;
     pointer-events: auto;
 }
-
 .filters-visible {
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
 }
 
-.filters:hover {
-    opacity: 1 !important;
+/* Filters layout */
+.filters {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+    margin: 0;
+}
+
+/* Slick select styling */
+.filters select {
+    flex: 1;
+    min-width: 100px;
+    padding: 0.6rem 0.9rem;
+    border-radius: 0.5rem;
+    border: 1px solid #dee2e6;
+    background-color: #fdfdfd;
+    font-size: 0.95rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg fill='%23999' height='16' viewBox='0 0 24 24' width='16' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 14px;
+}
+
+/* Hover + focus animations */
+.filters select:hover {
+    border-color: #0d6efd;
+}
+.filters select:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.2);
+    outline: none;
 }

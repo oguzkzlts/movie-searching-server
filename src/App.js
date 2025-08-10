@@ -221,13 +221,11 @@ function App() {
                         }`}
                     >
                         <Filters
-                            scrollDirection={scrollDirection}
-                            isScrolling={isScrolling}
                             genres={genres}
-                            onGenreChange={(value) => setSelectedGenre(value)}
-                            onYearChange={(value) => setSelectedYear(value)}
-                            onRatingChange={(value) => setSelectedRating(value)}
-                            onSortChange={(value) => setSortBy(value)}
+                            onGenreChange={setSelectedGenre}
+                            onYearChange={setSelectedYear}
+                            onRatingChange={setSelectedRating}
+                            onSortChange={setSortBy}
                         />
                     </div>
                 )}
