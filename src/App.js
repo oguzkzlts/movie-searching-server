@@ -22,82 +22,22 @@ function App() {
     const [selectedRating, setSelectedRating] = useState('');
     const [sortBy, setSortBy] = useState('popularity.desc');
     const [genres, setGenres] = useState([]);
-    const [scrollY, setScrollY] = useState(0);
-    const [lastScrollY, setLastScrollY] = useState(0);
     const [scrollDirection, setScrollDirection] = useState(null);
     const [isScrolling, setIsScrolling] = useState(false);
-
     const [showStickyFilters, setShowStickyFilters] = useState(false);
 
     const filtersRef = useRef(null);
 
+    // Fetch initial movie suggestions
     useEffect(() => {
-        const handleScroll = () => {
-            if (!initialLoadDone || loading || !hasMore) return;
-
-            const scrollTop = window.scrollY;
-            const windowHeight = window.innerHeight;
-            const fullHeight = document.documentElement.scrollHeight;
-
-            if (scrollTop + windowHeight >= fullHeight - 100) {
-                setPage(prev => {
-                    if (prev < totalPages) return prev + 1;
-                    return prev;
-                });
-            }
+        const fetchSuggestions = async () => {
+            const suggestions = await filmService.fetchInitialSuggestions();
+            setAllFilms(suggestions);
         };
-
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, [initialLoadDone, loading, hasMore, totalPages]);
-
-
-    useEffect(() => {
-        let lastY = window.scrollY;
-        let timeout;
-
-        const handleScroll = () => {
-            const currentY = window.scrollY;
-
-            // Detect scroll direction
-            if (currentY > lastY) {
-                setScrollDirection('down');
-            } else if (currentY < lastY) {
-                setScrollDirection('up');
-            }
-            lastY = currentY;
-
-            // Sticky trigger logic
-            if (filtersRef.current) {
-                const { bottom } = filtersRef.current.getBoundingClientRect();
-                setShowStickyFilters(bottom <= 0);
-            }
-
-            // Fade logic
-            setIsScrolling(true);
-            clearTimeout(timeout);
-            timeout = setTimeout(() => setIsScrolling(false), 150);
-        };
-
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
+        fetchSuggestions();
     }, []);
 
-    useEffect(() => {
-        if (!initialLoadDone) return;
-
-        // Reset everything and fetch new movies based on updated filters
-        accumulatedFilms.current = [];
-        setFilms([]);
-        setPage(1);
-        setHasMore(true);
-        loadMovies(searchTerm.trim() ? searchTerm : null, 1);
-    }, [selectedGenre, selectedYear, selectedRating, sortBy]);
-
-    useEffect(() => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, [selectedGenre, selectedYear, selectedRating, sortBy]);
-
+    // Fetch genres once
     useEffect(() => {
         const fetchGenres = async () => {
             try {
@@ -108,10 +48,10 @@ function App() {
                 console.error('Failed to fetch genres:', error);
             }
         };
-
         fetchGenres();
     }, []);
 
+    // Load movies function
     const loadMovies = async (query, pageNum) => {
         setLoading(true);
         try {
@@ -124,11 +64,7 @@ function App() {
 
             const { films: newFilms, totalPages } = await filmService.fetchMovies(query, pageNum, filterParams);
 
-            if (pageNum === 1) {
-                accumulatedFilms.current = newFilms;
-            } else {
-                accumulatedFilms.current = [...accumulatedFilms.current, ...newFilms];
-            }
+            accumulatedFilms.current = pageNum === 1 ? newFilms : [...accumulatedFilms.current, ...newFilms];
 
             setFilms(accumulatedFilms.current);
             setTotalPages(totalPages);
@@ -141,31 +77,75 @@ function App() {
         setLoading(false);
     };
 
-        useEffect(() => {
-        if (!searchTerm.trim()) {
-            loadMovies(null, 1).then(() => setInitialLoadDone(true));
-        }
-    }, []);
+    // Reload movies on filter changes
+    const reloadMovies = () => {
+        accumulatedFilms.current = [];
+        setFilms([]);
+        setPage(1);
+        setHasMore(true);
+        loadMovies(searchTerm.trim() ? searchTerm : null, 1);
+    };
 
     useEffect(() => {
-        setSelectedFilm(null);
-        setPage(1);
-        accumulatedFilms.current = [];
-        setHasMore(true);
+        if (initialLoadDone) reloadMovies();
+    }, [selectedGenre, selectedYear, selectedRating, sortBy]);
 
-        if (searchTerm.trim()) {
-            loadMovies(searchTerm, 1).then(() => setInitialLoadDone(true));
-        } else {
-            loadMovies(null, 1);
-        }
+    // Search debounce
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            accumulatedFilms.current = [];
+            setFilms([]);
+            setPage(1);
+            setHasMore(true);
+            loadMovies(searchTerm.trim() ? searchTerm : null, 1);
+            setInitialLoadDone(true);
+        }, 300);
+        return () => clearTimeout(handler);
     }, [searchTerm]);
 
+    // Scroll handling (infinite scroll + sticky filters + fade)
     useEffect(() => {
-        if (page > 1) {
-            loadMovies(searchTerm.trim() ? searchTerm : null, page);
-        }
+        let lastY = window.scrollY;
+        let timeout;
+
+        const handleScroll = () => {
+            const currentY = window.scrollY;
+
+            // Infinite scroll
+            if (initialLoadDone && !loading && hasMore) {
+                const windowHeight = window.innerHeight;
+                const fullHeight = document.documentElement.scrollHeight;
+                if (currentY + windowHeight >= fullHeight - 100 && page < totalPages) {
+                    setPage(prev => prev + 1);
+                }
+            }
+
+            // Detect scroll direction
+            setScrollDirection(currentY > lastY ? 'down' : 'up');
+            lastY = currentY;
+
+            // Sticky filters
+            if (filtersRef.current) {
+                const { bottom } = filtersRef.current.getBoundingClientRect();
+                setShowStickyFilters(bottom <= 0);
+            }
+
+            // Fade effect
+            setIsScrolling(true);
+            clearTimeout(timeout);
+            timeout = setTimeout(() => setIsScrolling(false), 150);
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [initialLoadDone, loading, hasMore, page, totalPages]);
+
+    // Load more on page change
+    useEffect(() => {
+        if (page > 1) loadMovies(searchTerm.trim() ? searchTerm : null, page);
     }, [page]);
 
+    // Select a movie
     const handleSelect = async (film) => {
         try {
             const enrichedFilm = await filmService.fetchMovieDetails(film.id);
@@ -176,17 +156,7 @@ function App() {
         }
     };
 
-    const handleSearch = (query) => {
-        setSearchTerm(query);
-    };
-
-    useEffect(() => {
-        const fetchSuggestions = async () => {
-            const suggestions = await filmService.fetchInitialSuggestions();
-            setAllFilms(suggestions);
-        };
-        fetchSuggestions();
-    }, []);
+    const handleSearch = (query) => setSearchTerm(query);
 
     return (
         <div className="app-wrapper d-flex flex-column min-vh-100">
@@ -201,15 +171,13 @@ function App() {
                     scrollDirection={scrollDirection}
                     isScrolling={false}
                     genres={genres}
-                    onGenreChange={(value) => setSelectedGenre(value)}
-                    onYearChange={(value) => setSelectedYear(value)}
-                    onRatingChange={(value) => setSelectedRating(value)}
-                    onSortChange={(value) => setSortBy(value)}
+                    onGenreChange={setSelectedGenre}
+                    onYearChange={setSelectedYear}
+                    onRatingChange={setSelectedRating}
+                    onSortChange={setSortBy}
                 />
 
-
-
-                {/* Sticky Filters that fade/hide/hover based on scroll */}
+                {/* Sticky Filters */}
                 {showStickyFilters && (
                     <div
                         className={`filters sticky-filters ${
@@ -255,6 +223,10 @@ function App() {
 
                     {!hasMore && films.length > 0 && (
                         <p className="text-center text-muted mt-3">No more movies to load.</p>
+                    )}
+
+                    {!loading && films.length === 0 && (
+                        <p className="text-center text-muted mt-3">No movies found.</p>
                     )}
                 </div>
             </main>
