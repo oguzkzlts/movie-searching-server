@@ -160,8 +160,8 @@ function App() {
 
     return (
         <div className="app-wrapper d-flex flex-column min-vh-100">
-            <main className="app container py-4 flex-grow-1">
-                <Header />
+            <main className="app container-fluid py-4 flex-grow-1">
+                <Header/>
                 <h1 className="mb-4">Movie Search</h1>
 
                 <Filters
@@ -209,13 +209,13 @@ function App() {
                 {selectedFilm && (
                     <div className="mb-5">
                         <h4 className="mb-3">Selected Movie</h4>
-                        <RecommendedMovies films={[selectedFilm]} />
+                        <RecommendedMovies films={[selectedFilm]}/>
                     </div>
                 )}
 
                 <div className="movies-container">
                     <h4 className="mb-3">Recommended Movies</h4>
-                    <RecommendedMovies films={films} />
+                    <RecommendedMovies films={films}/>
 
                     {loading && (
                         <p className="text-center mt-3 text-primary">Loading more movies...</p>
@@ -230,7 +230,7 @@ function App() {
                     )}
                 </div>
             </main>
-            <Footer visible={isScrolling} />
+            <Footer visible={isScrolling}/>
         </div>
     );
 }

@@ -1,9 +1,16 @@
 
 /* index.css or global CSS */
-html, body, #root {
-    height: 100%;
-    margin: 0;
+#root {
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 1rem;
+    box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+    padding: 2rem;
+
+    /* Add: */
+    width: 100%;
+    max-width: none;  /* remove implicit max-width from parent or Bootstrap */
 }
+
 
 .app-wrapper {
     display: flex;
@@ -32,6 +39,13 @@ html, body, #root {
     transition: opacity 0.3s ease, visibility 0.3s ease;
     line-height: 1.2;       /* reduce line height */
 }
+
+.recommended-movies-grid {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(clamp(180px, 20vw, 280px), 1fr));
+}
+
 
 
 
@@ -99,14 +113,27 @@ body {
 .movie-card {
     border: none;
     border-radius: 0.8rem;
-    overflow: hidden;
+    overflow: visible; /* allow scale to go outside the grid */
     margin-bottom: 20px;
     background-color: #fff;
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     display: flex;
     flex-direction: column;
+    transform-origin: center; /* make it scale from center */
 }
+
+.card.expanded {
+    transform: scale(1.05);
+    box-shadow: 0 16px 28px rgba(0,0,0,0.25);
+    z-index: 10;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: visible; /* important */
+    transform-origin: center;
+}
+
+
+
 
 .movie-card:hover {
     transform: translateY(-6px);
@@ -185,11 +212,11 @@ body {
     right: 0;
     z-index: 1000;
     padding: 0.75rem 1rem;
-    background: rgba(255, 255, 255, 0.85); /* translucent for modern look */
+    background: rgba(255, 255, 255, 0.75); /* translucent for modern look */
     backdrop-filter: blur(8px); /* frosted glass effect */
     box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     border-bottom: 1px solid rgba(0,0,0,0.05);
-    transition: opacity 0.3s ease, visibility 0.3s ease;
+    transition: opacity 0.6s ease, visibility 0.6s ease;
 }
 
 /* Keep your hidden/visible states */
@@ -199,9 +226,15 @@ body {
     pointer-events: none;
 }
 .filters-transparent {
-    opacity: 0.5;
+    opacity: 0.8;
     pointer-events: auto;
 }
+/* Make the filters bar fully opaque on hover */
+.sticky-filters.filters-transparent:hover {
+    opacity: 1;
+    backdrop-filter: blur(10px); /* optional: enhance frosted effect */
+}
+
 .filters-visible {
     opacity: 1;
     visibility: visible;
@@ -220,7 +253,7 @@ body {
 /* Slick select styling */
 .filters select {
     flex: 1;
-    min-width: 100px;
+    min-width: 150px;
     padding: 0.6rem 0.9rem;
     border-radius: 0.5rem;
     border: 1px solid #dee2e6;

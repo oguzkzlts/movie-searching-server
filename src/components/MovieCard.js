@@ -30,8 +30,8 @@ const MovieCard = ({ film }) => {
     };
 
     return (
-        <div className="card h-100 shadow-sm border-0">
-            <img src={film.image} className="card-img-top" alt={film.title} />
+        <div className={`card h-100 shadow-sm border-0 ${expanded ? 'expanded' : ''}`}>
+            <img src={film.image} className="card-img-top" alt={film.title}/>
             <div className="card-body d-flex flex-column">
                 <h5
                     ref={titleRef}
@@ -85,7 +85,7 @@ const MovieCard = ({ film }) => {
                 <button
                     onClick={toggleExpanded}
                     className="btn btn-sm btn-outline-secondary mt-2 align-self-start"
-                    style={{ fontWeight: 500 }}
+                    style={{fontWeight: 500}}
                     aria-label={expanded ? `Collapse synopsis for ${film.title}` : `Read more about ${film.title}`}
                 >
                     {expanded ? 'Less' : 'More'}
