@@ -30,7 +30,7 @@ const MovieCard = ({ film }) => {
     };
 
     return (
-        <div className={`card h-100 shadow-sm border-0 ${expanded ? 'expanded' : ''}`}>
+        <div className={`movie-card h-100 shadow-sm border-0 ${expanded ? 'expanded' : ''}`}>
             <img src={film.image} className="card-img-top" alt={film.title}/>
             <div className="card-body d-flex flex-column">
                 <h5
