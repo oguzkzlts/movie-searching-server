@@ -1,10 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
-import filmService from './services/filmService'; // Adjust path as needed
+import { Routes, Route } from 'react-router-dom';
+
+import filmService from './services/filmService';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import SearchBar from './components/SearchBar';
 import RecommendedMovies from './components/RecommendedMovies';
-import Filters from "./components/Filters";
+import Filters from './components/Filters';
+
+import Home from './pages/Home';
+import About from './pages/About';
+import Contact from './pages/Contact';
 
 function App() {
     const [allFilms, setAllFilms] = useState([]);
@@ -28,7 +34,7 @@ function App() {
 
     const filtersRef = useRef(null);
 
-    // Fetch initial movie suggestions
+    // Fetch initial suggestions
     useEffect(() => {
         const fetchSuggestions = async () => {
             const suggestions = await filmService.fetchInitialSuggestions();
@@ -37,11 +43,13 @@ function App() {
         fetchSuggestions();
     }, []);
 
-    // Fetch genres once
+    // Fetch genres
     useEffect(() => {
         const fetchGenres = async () => {
             try {
-                const res = await fetch(`https://api.themoviedb.org/3/genre/movie/list?api_key=${API_KEY}&language=en-US`);
+                const res = await fetch(
+                    `https://api.themoviedb.org/3/genre/movie/list?api_key=${process.env.REACT_APP_API_KEY}&language=en-US`
+                );
                 const data = await res.json();
                 setGenres(data.genres || []);
             } catch (error) {
@@ -51,7 +59,7 @@ function App() {
         fetchGenres();
     }, []);
 
-    // Load movies function
+    // Load movies
     const loadMovies = async (query, pageNum) => {
         setLoading(true);
         try {
@@ -77,7 +85,6 @@ function App() {
         setLoading(false);
     };
 
-    // Reload movies on filter changes
     const reloadMovies = () => {
         accumulatedFilms.current = [];
         setFilms([]);
@@ -103,7 +110,7 @@ function App() {
         return () => clearTimeout(handler);
     }, [searchTerm]);
 
-    // Scroll handling (infinite scroll + sticky filters + fade)
+    // Scroll handling
     useEffect(() => {
         let lastY = window.scrollY;
         let timeout;
@@ -111,7 +118,6 @@ function App() {
         const handleScroll = () => {
             const currentY = window.scrollY;
 
-            // Infinite scroll
             if (initialLoadDone && !loading && hasMore) {
                 const windowHeight = window.innerHeight;
                 const fullHeight = document.documentElement.scrollHeight;
@@ -120,17 +126,14 @@ function App() {
                 }
             }
 
-            // Detect scroll direction
             setScrollDirection(currentY > lastY ? 'down' : 'up');
             lastY = currentY;
 
-            // Sticky filters
             if (filtersRef.current) {
                 const { bottom } = filtersRef.current.getBoundingClientRect();
                 setShowStickyFilters(bottom <= 0);
             }
 
-            // Fade effect
             setIsScrolling(true);
             clearTimeout(timeout);
             timeout = setTimeout(() => setIsScrolling(false), 150);
@@ -140,12 +143,10 @@ function App() {
         return () => window.removeEventListener('scroll', handleScroll);
     }, [initialLoadDone, loading, hasMore, page, totalPages]);
 
-    // Load more on page change
     useEffect(() => {
         if (page > 1) loadMovies(searchTerm.trim() ? searchTerm : null, page);
     }, [page]);
 
-    // Select a movie
     const handleSelect = async (film) => {
         try {
             const enrichedFilm = await filmService.fetchMovieDetails(film.id);
@@ -160,77 +161,87 @@ function App() {
 
     return (
         <div className="app-wrapper d-flex flex-column min-vh-100">
+            <Header />
             <main className="app container-fluid py-4 flex-grow-1">
-                <Header/>
-                <h1 className="mb-4">Movie Search</h1>
+                <Routes>
+                    <Route
+                        path="/"
+                        element={
+                            <div>
+                                <h1 className="mb-4">Movie Search</h1>
 
-                <Filters
-                    className="filters static"
-                    ref={filtersRef}
-                    static
-                    scrollDirection={scrollDirection}
-                    isScrolling={false}
-                    genres={genres}
-                    onGenreChange={setSelectedGenre}
-                    onYearChange={setSelectedYear}
-                    onRatingChange={setSelectedRating}
-                    onSortChange={setSortBy}
-                />
+                                <Filters
+                                    className="filters static"
+                                    ref={filtersRef}
+                                    static
+                                    scrollDirection={scrollDirection}
+                                    isScrolling={false}
+                                    genres={genres}
+                                    onGenreChange={setSelectedGenre}
+                                    onYearChange={setSelectedYear}
+                                    onRatingChange={setSelectedRating}
+                                    onSortChange={setSortBy}
+                                />
 
-                {/* Sticky Filters */}
-                {showStickyFilters && (
-                    <div
-                        className={`filters sticky-filters ${
-                            scrollDirection === 'down' && isScrolling
-                                ? 'filters-hidden'
-                                : !isScrolling
-                                    ? 'filters-transparent'
-                                    : 'filters-visible'
-                        }`}
-                    >
-                        <Filters
-                            genres={genres}
-                            onGenreChange={setSelectedGenre}
-                            onYearChange={setSelectedYear}
-                            onRatingChange={setSelectedRating}
-                            onSortChange={setSortBy}
-                        />
-                    </div>
-                )}
+                                {showStickyFilters && (
+                                    <div
+                                        className={`filters sticky-filters ${
+                                            scrollDirection === 'down' && isScrolling
+                                                ? 'filters-hidden'
+                                                : !isScrolling
+                                                    ? 'filters-transparent'
+                                                    : 'filters-visible'
+                                        }`}
+                                    >
+                                        <Filters
+                                            genres={genres}
+                                            onGenreChange={setSelectedGenre}
+                                            onYearChange={setSelectedYear}
+                                            onRatingChange={setSelectedRating}
+                                            onSortChange={setSortBy}
+                                        />
+                                    </div>
+                                )}
 
-                <div className="search-container mb-5">
-                    <SearchBar
-                        onSearch={handleSearch}
-                        suggestions={allFilms}
-                        onSelect={handleSelect}
+                                <div className="search-container mb-5">
+                                    <SearchBar
+                                        onSearch={handleSearch}
+                                        suggestions={allFilms}
+                                        onSelect={handleSelect}
+                                    />
+                                </div>
+
+                                {selectedFilm && (
+                                    <div className="mb-5">
+                                        <h4 className="mb-3">Selected Movie</h4>
+                                        <RecommendedMovies films={[selectedFilm]} />
+                                    </div>
+                                )}
+
+                                <div className="movies-container">
+                                    <h4 className="mb-3">Recommended Movies</h4>
+                                    <RecommendedMovies films={films} />
+
+                                    {loading && (
+                                        <p className="text-center mt-3 text-primary">Loading more movies...</p>
+                                    )}
+
+                                    {!hasMore && films.length > 0 && (
+                                        <p className="text-center text-muted mt-3">No more movies to load.</p>
+                                    )}
+
+                                    {!loading && films.length === 0 && (
+                                        <p className="text-center text-muted mt-3">No movies found.</p>
+                                    )}
+                                </div>
+                            </div>
+                        }
                     />
-                </div>
-
-                {selectedFilm && (
-                    <div className="mb-5">
-                        <h4 className="mb-3">Selected Movie</h4>
-                        <RecommendedMovies films={[selectedFilm]}/>
-                    </div>
-                )}
-
-                <div className="movies-container">
-                    <h4 className="mb-3">Recommended Movies</h4>
-                    <RecommendedMovies films={films}/>
-
-                    {loading && (
-                        <p className="text-center mt-3 text-primary">Loading more movies...</p>
-                    )}
-
-                    {!hasMore && films.length > 0 && (
-                        <p className="text-center text-muted mt-3">No more movies to load.</p>
-                    )}
-
-                    {!loading && films.length === 0 && (
-                        <p className="text-center text-muted mt-3">No movies found.</p>
-                    )}
-                </div>
+                    <Route path="/about" element={<About />} />
+                    <Route path="/contact" element={<Contact />} />
+                </Routes>
             </main>
-            <Footer visible={isScrolling}/>
+            <Footer visible={isScrolling} />
         </div>
     );
 }
