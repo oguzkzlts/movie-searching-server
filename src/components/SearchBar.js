@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const SearchBar = ({ onSearch, suggestions }) => {
+const SearchBar = ({ onSearch, suggestions, onFilmSelect }) => {
     const [value, setValue] = useState('');
     const [filteredSug, setFilteredSug] = useState([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
@@ -28,13 +28,16 @@ const SearchBar = ({ onSearch, suggestions }) => {
     const handleSelect = (title) => {
         setValue(title);
         onSearch(title);
-        const selectedFilm = suggestions.find(f => f.title === title);
-        if (selectedFilm && onSelect) onSelect(selectedFilm);
         setShowSuggestions(false);
     };
 
     return (
-        <div className="search-bar position-relative mb-4" style={{ marginTop: '20px' }}>
+        <div
+            className={`search-bar position-relative mb-4 ${
+                scrollDirection === 'down' ? 'search-hidden' : 'search-visible'
+            }`}
+            style={{ marginTop: '20px' }}
+        >
             <input
                 type="text"
                 className="form-control"
@@ -42,8 +45,12 @@ const SearchBar = ({ onSearch, suggestions }) => {
                 value={value}
                 onChange={handleChange}
             />
+
             {showSuggestions && filteredSug.length > 0 && (
-                <ul className="list-group position-absolute w-100" style={{ zIndex: 10 }}>
+                <ul
+                    className="list-group position-absolute w-100"
+                    style={{ zIndex: 10 }}
+                >
                     {filteredSug.map(film => (
                         <li
                             key={film.id}

@@ -28,7 +28,7 @@ function App() {
     const [selectedRating, setSelectedRating] = useState('');
     const [sortBy, setSortBy] = useState('popularity.desc');
     const [genres, setGenres] = useState([]);
-    const [scrollDirection, setScrollDirection] = useState(null);
+    const [scrollDirection, setScrollDirection] = useState('up');
     const [isScrolling, setIsScrolling] = useState(false);
     const [showStickyFilters, setShowStickyFilters] = useState(false);
 
@@ -186,11 +186,11 @@ function App() {
                                 {showStickyFilters && (
                                     <div
                                         className={`filters sticky-filters ${
-                                            scrollDirection === 'down' && isScrolling
-                                                ? 'filters-hidden'
-                                                : !isScrolling
-                                                    ? 'filters-transparent'
-                                                    : 'filters-visible'
+                                            scrollDirection === 'down'
+                                                ? 'filters-hidden' // If going down, HIDE (regardless of whether you stop)
+                                                : isScrolling
+                                                    ? 'filters-visible'     // If going up + moving -> Fully Opaque
+                                                    : 'filters-transparent' // If going up + stopped -> Semi-transparent
                                         }`}
                                     >
                                         <Filters
@@ -207,7 +207,7 @@ function App() {
                                     <SearchBar
                                         onSearch={handleSearch}
                                         suggestions={allFilms}
-                                        onSelect={handleSelect}
+                                        onFilmSelect={handleSelect}
                                     />
                                 </div>
 
