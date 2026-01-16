@@ -113,7 +113,7 @@ body {
     overflow: visible; /* allow scale to go outside the grid */
     margin-bottom: 20px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: background-color 0.25s ease,transform 0.3s ease, box-shadow 0.3s ease;
     display: flex;
     flex-direction: column;
     transform-origin: center; /* make it scale from center */
@@ -143,6 +143,7 @@ body {
 .movie-card:hover {
     transform: translateY(-6px);
     box-shadow: 0 12px 20px rgba(0,0,0,0.18);
+    background-color: #fde6ee;
 }
 
 .movie-card img {
