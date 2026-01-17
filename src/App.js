@@ -16,7 +16,9 @@ function App() {
     const [allFilms, setAllFilms] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [films, setFilms] = useState([]);
-    const [selectedFilm, setSelectedFilm] = useState(null);
+
+    // REMOVED: selectedFilm state is no longer needed
+
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [loading, setLoading] = useState(false);
@@ -147,13 +149,26 @@ function App() {
         if (page > 1) loadMovies(searchTerm.trim() ? searchTerm : null, page);
     }, [page]);
 
+    // Handle selection (Open IMDb)
     const handleSelect = async (film) => {
+        const newTab = window.open('', '_blank');
+        if (newTab) newTab.document.write("Loading movie details...");
+
         try {
             const enrichedFilm = await filmService.fetchMovieDetails(film.id);
-            setSelectedFilm(enrichedFilm);
+
+            if (enrichedFilm.imdb_id) {
+                if (newTab) newTab.location.href = `https://www.imdb.com/title/${enrichedFilm.imdb_id}/`;
+            } else {
+                console.warn("No IMDb ID found.");
+                if (newTab) {
+                    newTab.close();
+                    alert("No IMDb page found for this movie.");
+                }
+            }
         } catch (error) {
             console.error('Failed to fetch details:', error);
-            setSelectedFilm(null);
+            if (newTab) newTab.close();
         }
     };
 
@@ -187,10 +202,10 @@ function App() {
                                     <div
                                         className={`filters sticky-filters ${
                                             scrollDirection === 'down'
-                                                ? 'filters-hidden' // If going down, HIDE (regardless of whether you stop)
+                                                ? 'filters-hidden'
                                                 : isScrolling
-                                                    ? 'filters-visible'     // If going up + moving -> Fully Opaque
-                                                    : 'filters-transparent' // If going up + stopped -> Semi-transparent
+                                                    ? 'filters-visible'
+                                                    : 'filters-transparent'
                                         }`}
                                     >
                                         <Filters
@@ -211,16 +226,14 @@ function App() {
                                     />
                                 </div>
 
-                                {selectedFilm && (
-                                    <div className="mb-5">
-                                        <h4 className="mb-3">Selected Movie</h4>
-                                        <RecommendedMovies films={[selectedFilm]} />
-                                    </div>
-                                )}
+                                {/* REMOVED: Selected Movie Section was here */}
 
                                 <div className="movies-container">
                                     <h4 className="mb-3">Recommended Movies</h4>
-                                    <RecommendedMovies films={films} />
+                                    <RecommendedMovies
+                                        films={films}
+                                        onFilmSelect={handleSelect}
+                                    />
 
                                     {loading && (
                                         <p className="text-center mt-3 text-primary">Loading more movies...</p>

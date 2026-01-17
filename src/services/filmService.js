@@ -72,6 +72,7 @@ async function fetchMovieDetails(movieId) {
     return {
         id: details.id,
         title: details.title,
+        imdb_id: details.imdb_id,
         year: details.release_date ? parseInt(details.release_date.slice(0, 4)) : null,
         genre: details.genres ? details.genres.map(g => g.name) : [],
         director: director ? director.name : null,

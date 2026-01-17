@@ -1,22 +1,34 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 
 const SearchBar = ({ onSearch, suggestions, onFilmSelect }) => {
     const [value, setValue] = useState('');
-    const [filteredSug, setFilteredSug] = useState([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
 
-    useEffect(() => {
-        if (value) {
-            const list = suggestions
-                .filter(film =>
-                    film.title.toLowerCase().includes(value.toLowerCase())
-                )
-                .slice(0, 5);
-            setFilteredSug(list);
-        } else {
-            setFilteredSug([]);
-        }
+    // Ref to detect clicks outside the component
+    const searchRef = useRef(null);
+
+    // OPTIMIZATION: Filter immediately using useMemo.
+    // This avoids the double-render caused by useEffect.
+    const filteredSug = useMemo(() => {
+        if (!value) return [];
+        return suggestions
+            .filter(film => film.title.toLowerCase().includes(value.toLowerCase()))
+            .slice(0, 5);
     }, [value, suggestions]);
+
+    // UX: Handle clicks outside to close the dropdown
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (searchRef.current && !searchRef.current.contains(event.target)) {
+                setShowSuggestions(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
 
     const handleChange = (e) => {
         const val = e.target.value;
@@ -25,17 +37,20 @@ const SearchBar = ({ onSearch, suggestions, onFilmSelect }) => {
         setShowSuggestions(true);
     };
 
-    const handleSelect = (title) => {
-        setValue(title);
-        onSearch(title);
+    const handleSelect = (film) => {
+        setValue(film.title);
         setShowSuggestions(false);
+
+        // This triggers the parent to fetch details/open IMDb
+        if (onFilmSelect) {
+            onFilmSelect(film);
+        }
     };
 
     return (
         <div
-            className={`search-bar position-relative mb-4 ${
-                scrollDirection === 'down' ? 'search-hidden' : 'search-visible'
-            }`}
+            ref={searchRef}
+            className="search-bar position-relative mb-4"
             style={{ marginTop: '20px' }}
         >
             <input
@@ -44,18 +59,20 @@ const SearchBar = ({ onSearch, suggestions, onFilmSelect }) => {
                 placeholder="Search films..."
                 value={value}
                 onChange={handleChange}
+                // UX: Re-open suggestions if user clicks back into the input
+                onFocus={() => { if(value) setShowSuggestions(true); }}
             />
 
             {showSuggestions && filteredSug.length > 0 && (
                 <ul
                     className="list-group position-absolute w-100"
-                    style={{ zIndex: 10 }}
+                    style={{ zIndex: 1000, cursor: 'pointer' }}
                 >
                     {filteredSug.map(film => (
                         <li
                             key={film.id}
                             className="list-group-item list-group-item-action"
-                            onClick={() => handleSelect(film.title)}
+                            onClick={() => handleSelect(film)}
                         >
                             {film.title}
                         </li>
